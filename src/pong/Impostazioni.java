@@ -28,7 +28,15 @@ public record Impostazioni(int puntiPerVincere, int scartoMinimo, int velocitaPa
      * dice quale valore è sbagliato e perché.
      */
     public Impostazioni {
-        // scrivete qui
+        if ((puntiPerVincere < 1 || puntiPerVincere > 99) ) {
+            throw new IllegalArgumentException("Il valore assegnato a Punti per Vincere è " + puntiPerVincere + " ma deve essere compreso tra 1 e 99.");
+        }
+        if ((scartoMinimo < 1 || scartoMinimo > 10) ) {
+            throw new IllegalArgumentException("Il valore assegnato a Punti per Vincere è " + scartoMinimo + " ma deve essere compreso tra 1 e 10.");
+        }
+        if ((velocitaPalla < 1 || velocitaPalla > 20) ) {
+            throw new IllegalArgumentException("Il valore assegnato a Punti per Vincere è " + velocitaPalla + " ma deve essere compreso tra 1 e 20.");
+        }
     }
 
     /**
@@ -51,7 +59,65 @@ public record Impostazioni(int puntiPerVincere, int scartoMinimo, int velocitaPa
      * Se ci sono errori in più righe, il messaggio è quello della riga più in alto.
      */
     public static Impostazioni leggi(List<String> righe) {
-        return STANDARD; // scrivete qui
+        int puntiPerVincere = STANDARD.puntiPerVincere;
+        int scartoMinimo = STANDARD.scartoMinimo;
+        int velocitaPalla = STANDARD.velocitaPalla;
+        boolean puntiLetti = false;
+        boolean scartoLetto = false;
+        boolean velocitaLetta = false;
+        for (int i = 0; i < righe.size(); i++) {
+            String riga = righe.get(i).trim();
+            if (riga.isEmpty() || riga.startsWith("#")) { continue; }
+            int posizioneUguale = riga.indexOf('=');
+            if (posizioneUguale < 0) {
+                throw new IllegalArgumentException("riga " + (i+1) + ": manca l'uguale");
+            }
+            String chiave = riga.substring(0, posizioneUguale).trim();
+            String valore = riga.substring(posizioneUguale+ 1).trim();
+            switch (chiave) {
+                case "puntiPerVincere":
+                    if (puntiLetti == true) {
+                        throw new IllegalArgumentException("riga " + (i+1) + ": la chiave " + chiave + " è già stata utilizzata in una riga precedente");
+                    }
+                    puntiPerVincere = leggiIntero(chiave, valore, i+1);
+                    if ((puntiPerVincere < 1 || puntiPerVincere > 99) ) {
+                        throw new IllegalArgumentException("riga " + (i+1) + ": il valore assegnato a Punti per Vincere è " + puntiPerVincere + " ma deve essere compreso tra 1 e 99.");
+                    }
+                    puntiLetti = true;
+                    break;
+                case "scartoMinimo":
+                    if (scartoLetto == true) {
+                        throw new IllegalArgumentException("riga " + (i+1) + ": la chiave " + chiave + " è già stata utilizzata in una riga precedente");
+                    }
+                    scartoMinimo = leggiIntero(chiave, valore, i+1);
+                    if ((scartoMinimo < 1 || scartoMinimo > 10) ) {
+                        throw new IllegalArgumentException("riga " + (i+1) + ": il valore assegnato a Scarto Minimo è " + scartoMinimo + " ma deve essere compreso tra 1 e 10.");
+                    }
+                    scartoLetto = true; 
+                    break;
+                case "velocitaPalla":
+                    if (velocitaLetta == true) {
+                        throw new IllegalArgumentException("riga " + (i+1) + ": la chiave " + chiave + " è già stata utilizzata in una riga precedente");
+                    }
+                    velocitaPalla = leggiIntero(chiave, valore, i+1);
+                    if ((velocitaPalla < 1 || velocitaPalla > 20) ) {
+                        throw new IllegalArgumentException("riga " + (i+1) + ": il valore assegnato a Velocità Palla è " + velocitaPalla + " ma deve essere compreso tra 1 e 20.");
+                    }
+                    velocitaLetta = true;
+                    break;
+                default:
+                    throw new IllegalArgumentException("riga " + (i+1) + ": chiave sconosciuta" );
+            }
+        }
+        return new Impostazioni(puntiPerVincere, scartoMinimo, velocitaPalla);
+    }
+
+    public static int leggiIntero(String chiave, String valore, int n) {
+        try {
+            return Integer.parseInt(valore);
+        } catch (NumberFormatException e) {
+            throw new IllegalArgumentException("riga " + n + ": il valore non è un numero intero");
+        }
     }
 
     /**
